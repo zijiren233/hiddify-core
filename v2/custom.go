@@ -96,7 +96,7 @@ func StartService(in *pb.StartRequest) (*pb.CoreInfoResponse, error) {
 		StopAndAlert(pb.MessageType_UNEXPECTED_ERROR, err.Error())
 		return &resp, err
 	}
-	if !in.EnableRawConfig {
+	if !in.EnableRawConfig && configOptions != nil {
 		Log(pb.LogLevel_DEBUG, pb.LogType_CORE, "Building config")
 		parsedContent_tmp, err := config.BuildConfig(*configOptions, parsedContent)
 		if err != nil {
