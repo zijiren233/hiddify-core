@@ -89,8 +89,6 @@ jobs:
         run: |
           tree 
           rm -f /*.h */*.h
-          rm ./phantom-libcore*sources* ||echo "no source"
-          rm ./phantom-libcore-macos-a*.dylib || echo "no macos arm and amd"
           files=$(ls | grep -E '^(libcore\.(dll|so|dylib|aar|a)|Libcore.xcframework|lib)$')
           echo tar -czvf ${{ matrix.job.name }}.tar.gz  $files
           tar -czvf ${{ matrix.job.name }}.tar.gz  $files
