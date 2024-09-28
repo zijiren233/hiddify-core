@@ -17,7 +17,7 @@ import (
 
 var (
 	Box              *libbox.BoxService
-	configOptions    *config.ConfigOptions
+	configOptions    *config.ConfigOptions = config.DefaultConfigOptions()
 	activeConfigPath string
 	coreLogFactory   log.Factory
 	useFlutterBridge bool = true
@@ -96,8 +96,11 @@ func StartService(in *pb.StartRequest) (*pb.CoreInfoResponse, error) {
 		StopAndAlert(pb.MessageType_UNEXPECTED_ERROR, err.Error())
 		return &resp, err
 	}
-	if !in.EnableRawConfig && configOptions != nil {
+	if !in.EnableRawConfig {
 		Log(pb.LogLevel_DEBUG, pb.LogType_CORE, "Building config")
+		if configOptions == nil {
+			configOptions = config.DefaultConfigOptions()
+		}
 		parsedContent_tmp, err := config.BuildConfig(*configOptions, parsedContent)
 		if err != nil {
 			Log(pb.LogLevel_FATAL, pb.LogType_CORE, err.Error())
