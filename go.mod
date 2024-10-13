@@ -23,8 +23,9 @@ require (
 	github.com/fatih/color v1.17.0 // indirect
 	github.com/mattn/go-colorable v0.1.13 // indirect
 	github.com/mattn/go-isatty v0.0.20 // indirect
+	github.com/panjf2000/ants/v2 v2.10.0 // indirect
 	github.com/zijiren233/gencontainer v0.0.0-20241008162312-0d000427d9f5 // indirect
-	github.com/zijiren233/gwst v0.1.2 // indirect
+	github.com/zijiren233/gwst v0.1.3 // indirect
 )
 
 require (
@@ -125,7 +126,7 @@ require (
 	lukechampine.com/blake3 v1.3.0 // indirect
 )
 
-replace github.com/sagernet/sing-box => github.com/zijiren233/hiddify-sing-box v0.0.0-20241013110455-f81b905d02fe
+replace github.com/sagernet/sing-box => github.com/zijiren233/hiddify-sing-box v0.0.0-20241013122342-09da568b958d
 
 replace github.com/xtls/xray-core => github.com/hiddify/xray-core v0.0.0-20240902024714-0fcb0895bb4b
 
