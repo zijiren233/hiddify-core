@@ -36,10 +36,10 @@ jobs:
             }
           - {
               name: "phantom-core-macos-universal",
-              os: "macos-12",
+              os: "macOS-13",
               target: "macos-universal",
             }
-          - { name: "phantom-core-ios", os: "macos-12", target: "ios" }
+          - { name: "phantom-core-ios", os: "macOS-13", target: "ios" }
 
     runs-on: ${{ matrix.job.os }}
     steps:
