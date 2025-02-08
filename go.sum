@@ -325,8 +325,8 @@ github.com/zijiren233/gencontainer v0.0.0-20241030052007-1f7025eb92f5 h1:/3MxA7C
 github.com/zijiren233/gencontainer v0.0.0-20241030052007-1f7025eb92f5/go.mod h1:bt31/uEP7Eq5qEEW+I/9AzCsueDohCwXLwy/rnLpNPY=
 github.com/zijiren233/gwst v0.4.5 h1:CIJyvszLJa5T1QBDTTTiC3QwXSD5YnZt2wEMhVrA1WA=
 github.com/zijiren233/gwst v0.4.5/go.mod h1:O0Um94TssHFyvKgJSxxmOl52lD79RMQbliXSLMRblLI=
-github.com/zijiren233/hiddify-sing-box v0.0.0-20241222170609-ac08a720f410 h1:q6OpuarRGx73SDfY2gnV18TD6rpSwdpQ3ozKwPp0xj0=
-github.com/zijiren233/hiddify-sing-box v0.0.0-20241222170609-ac08a720f410/go.mod h1:PL+D9R6JsK/bGi2lg7CidKVTBdar6YLM9fp3AIHtTZQ=
+github.com/zijiren233/hiddify-sing-box v0.0.0-20250208160549-f8185402fd53 h1:Wstup2w0OuEiZy/YZlMotfur8ZFTOzij8RRuWxn5T5g=
+github.com/zijiren233/hiddify-sing-box v0.0.0-20250208160549-f8185402fd53/go.mod h1:PL+D9R6JsK/bGi2lg7CidKVTBdar6YLM9fp3AIHtTZQ=
 go.opencensus.io v0.18.0/go.mod h1:vKdFvxhtzZ9onBp9VKHK8z/sRpBMnKAsufL7wlDrCOA=
 go.uber.org/goleak v1.3.0 h1:2K3zAYmnTNqV73imy9J1T3WC+gmCePx2hEGkimedGto=
 go.uber.org/goleak v1.3.0/go.mod h1:CoHD4mav9JJNrW/WLlf7HGZPjdw8EucARQHekz1X6bE=
