@@ -123,7 +123,7 @@ require (
 	lukechampine.com/blake3 v1.3.0 // indirect
 )
 
-replace github.com/sagernet/sing-box => github.com/zijiren233/hiddify-sing-box v0.0.0-20250323065622-48ce16675705
+replace github.com/sagernet/sing-box => github.com/zijiren233/hiddify-sing-box v0.0.0-20250501132202-016d234d5826
 
 replace github.com/xtls/xray-core => github.com/hiddify/xray-core v0.0.0-20240902024714-0fcb0895bb4b
 
