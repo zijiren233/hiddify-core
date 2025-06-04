@@ -31,12 +31,13 @@ import (
 	"github.com/sagernet/sing/service/pause"
 )
 
-func NewBoxService(ctx context.Context, cancel context.CancelFunc, instance *box.Box, pauseManager pause.Manager, urlTestHistoryStorage *urltest.HistoryStorage) BoxService {
+func NewBoxService(ctx context.Context, cancel context.CancelFunc, instance *box.Box, urlTestHistoryStorage *urltest.HistoryStorage) BoxService {
 	return BoxService{
 		ctx:                   ctx,
 		cancel:                cancel,
 		instance:              instance,
-		pauseManager:          pauseManager,
+		pauseManager:          service.FromContext[pause.Manager](ctx),
+		clashServer:           service.FromContext[adapter.ClashServer](ctx),
 		urlTestHistoryStorage: urlTestHistoryStorage,
 	}
 }

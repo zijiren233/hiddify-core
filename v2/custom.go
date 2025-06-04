@@ -80,7 +80,8 @@ func StartService(in *pb.StartRequest) (*pb.CoreInfoResponse, error) {
 	content := in.GetConfigContent()
 	Log(pb.LogLevel_DEBUG, pb.LogType_CORE, "Parsing Config")
 
-	parsedContent, err := readOptions(content)
+	ctx := libbox.BaseContext(nil)
+	parsedContent, err := readOptions(ctx, content)
 	Log(pb.LogLevel_DEBUG, pb.LogType_CORE, "Parsed")
 
 	if err != nil {
@@ -110,7 +111,7 @@ func StartService(in *pb.StartRequest) (*pb.CoreInfoResponse, error) {
 	}
 
 	Log(pb.LogLevel_DEBUG, pb.LogType_CORE, "Stating Service ")
-	instance, err := NewService(parsedContent)
+	instance, err := NewService(ctx, parsedContent)
 	if err != nil {
 		Log(pb.LogLevel_FATAL, pb.LogType_CORE, err.Error())
 		resp := SetCoreStatus(pb.CoreState_STOPPED, pb.MessageType_CREATE_SERVICE, err.Error())

@@ -13,9 +13,9 @@ import (
 	"github.com/sagernet/sing-box/log"
 	"github.com/sagernet/sing-box/option"
 	E "github.com/sagernet/sing/common/exceptions"
+	"github.com/sagernet/sing/common/json"
 	"github.com/sagernet/sing/service"
 	"github.com/sagernet/sing/service/filemanager"
-	"github.com/sagernet/sing/service/pause"
 )
 
 var (
@@ -58,9 +58,9 @@ func Setup(basePath, workingPath, tempPath string, statusPort int64, debug bool)
 	return err
 }
 
-func NewService(options option.Options) (*libbox.BoxService, error) {
+func NewService(ctx context.Context, options option.Options) (*libbox.BoxService, error) {
 	runtimeDebug.FreeOSMemory()
-	ctx, cancel := context.WithCancel(context.Background())
+	ctx, cancel := context.WithCancel(ctx)
 	ctx = filemanager.WithDefault(ctx, sWorkingPath, sTempPath, sUserID, sGroupID)
 	urlTestHistoryStorage := urltest.NewHistoryStorage()
 	ctx = service.ContextWithPtr(ctx, urlTestHistoryStorage)
@@ -77,17 +77,14 @@ func NewService(options option.Options) (*libbox.BoxService, error) {
 		ctx,
 		cancel,
 		instance,
-		service.FromContext[pause.Manager](ctx),
 		urlTestHistoryStorage,
 	)
 	return &service, nil
 }
 
-func readOptions(configContent string) (option.Options, error) {
-	var options option.Options
-	err := options.UnmarshalJSONContext(context.Background(), []byte(configContent))
-	if err != nil {
-		return option.Options{}, E.Cause(err, "decode config")
-	}
-	return options, nil
+func readOptions(ctx context.Context, configContent string) (option.Options, error) {
+	return json.UnmarshalExtendedContext[option.Options](
+		ctx,
+		[]byte(configContent),
+	)
 }

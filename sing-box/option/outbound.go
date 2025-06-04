@@ -84,8 +84,30 @@ type DialerOptions struct {
 	FallbackNetworkType badoption.Listable[InterfaceType] `json:"fallback_network_type,omitempty"`
 	FallbackDelay       badoption.Duration                `json:"fallback_delay,omitempty"`
 
+	WsTunnel *WsTunnel `json:"ws_tunnel,omitempty"`
+
 	// Deprecated: migrated to domain resolver
 	DomainStrategy DomainStrategy `json:"domain_strategy,omitempty"`
+}
+
+type WsTunnel struct {
+	Enabled bool `json:"enabled,omitempty"`
+
+	LoadBalance bool `json:"load_balance,omitempty"`
+
+	FallbackAddrs []string `json:"fallback_addrs,omitempty"`
+
+	Host string `json:"host,omitempty"`
+	Path string `json:"path,omitempty"`
+
+	Key string `json:"key,omitempty"`
+
+	TLS        bool   `json:"tls,omitempty"`
+	ServerName string `json:"server_name,omitempty"`
+	Insecure   bool   `json:"insecure,omitempty"`
+
+	Target      string `json:"target,omitempty"`
+	NamedTarget string `json:"named_target,omitempty"`
 }
 
 type _DomainResolveOptions struct {
