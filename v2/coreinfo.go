@@ -10,6 +10,7 @@ import (
 )
 
 var coreInfoObserver = NewObserver[pb.CoreInfoResponse](10)
+
 var CoreState = pb.CoreState_STOPPED
 
 func SetCoreStatus(state pb.CoreState, msgType pb.MessageType, message string) pb.CoreInfoResponse {
@@ -30,7 +31,6 @@ func SetCoreStatus(state pb.CoreState, msgType pb.MessageType, message string) p
 		bridge.SendStringToPort(statusPropagationPort, string(msg))
 	}
 	return info
-
 }
 
 func (s *CoreService) CoreInfoListener(stream pb.Core_CoreInfoListenerServer) error {
