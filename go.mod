@@ -6,6 +6,7 @@ toolchain go1.24.3
 
 require (
 	github.com/kardianos/service v1.2.2
+	github.com/sagernet/gomobile v0.1.6
 	github.com/sagernet/sing v0.6.11-0.20250521033217-30d675ea099b
 	github.com/sagernet/sing-box v1.11.11
 	golang.org/x/sys v0.33.0
