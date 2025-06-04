@@ -18,6 +18,7 @@ var port int = 18020
 func (m *hiddifyNext) Start(s service.Service) error {
 	return StartTunnelGrpcServer(fmt.Sprintf("127.0.0.1:%d", port))
 }
+
 func (m *hiddifyNext) Stop(s service.Service) error {
 	_, err := Stop()
 	if err != nil {
@@ -39,13 +40,14 @@ func getCurrentExecutableDirectory() string {
 
 	return executableDirectory
 }
+
 func StartTunnelService(goArg string) (int, string) {
 	svcConfig := &service.Config{
 		Name:        "HiddifyTunnelService",
 		DisplayName: "Hiddify Tunnel Service",
 		Arguments:   []string{"tunnel", "run"},
 		Description: "This is a bridge for tunnel",
-		Option: map[string]interface{}{
+		Option: map[string]any{
 			"RunAtLoad":        true,
 			"WorkingDirectory": getCurrentExecutableDirectory(),
 		},
@@ -91,12 +93,13 @@ func control(s service.Service, goArg string) (int, string) {
 		}
 		err = s.Uninstall()
 	case "start":
-		if status == service.StatusRunning {
+		switch status {
+		case service.StatusRunning:
 			if dolog {
 				fmt.Printf("Tunnel Service Already Running.\n")
 			}
 			return 0, "Tunnel Service Already Running."
-		} else if status == service.StatusUnknown {
+		case service.StatusUnknown:
 			s.Uninstall()
 			s.Install()
 			status, serr = s.Status()
@@ -131,15 +134,14 @@ func control(s service.Service, goArg string) (int, string) {
 	if err == nil {
 		out := fmt.Sprintf("Tunnel Service %sed Successfully.", goArg)
 		if dolog {
-			fmt.Printf(out)
+			fmt.Print(out)
 		}
 		return 0, out
 	} else {
 		out := fmt.Sprintf("Error: %v", err)
 		if dolog {
-			log.Printf(out)
+			log.Print(out)
 		}
 		return 2, out
 	}
-
 }

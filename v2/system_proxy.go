@@ -7,12 +7,15 @@ import (
 	"github.com/sagernet/sing-box/experimental/libbox"
 )
 
-func (s *CoreService) GetSystemProxyStatus(ctx context.Context, empty *pb.Empty) (*pb.SystemProxyStatus, error) {
+func (s *CoreService) GetSystemProxyStatus(
+	ctx context.Context,
+	empty *pb.Empty,
+) (*pb.SystemProxyStatus, error) {
 	return GetSystemProxyStatus(ctx, empty)
 }
+
 func GetSystemProxyStatus(ctx context.Context, empty *pb.Empty) (*pb.SystemProxyStatus, error) {
 	status, err := libbox.NewStandaloneCommandClient().GetSystemProxyStatus()
-
 	if err != nil {
 		return nil, err
 	}
@@ -23,12 +26,18 @@ func GetSystemProxyStatus(ctx context.Context, empty *pb.Empty) (*pb.SystemProxy
 	}, nil
 }
 
-func (s *CoreService) SetSystemProxyEnabled(ctx context.Context, in *pb.SetSystemProxyEnabledRequest) (*pb.Response, error) {
+func (s *CoreService) SetSystemProxyEnabled(
+	ctx context.Context,
+	in *pb.SetSystemProxyEnabledRequest,
+) (*pb.Response, error) {
 	return SetSystemProxyEnabled(ctx, in)
 }
-func SetSystemProxyEnabled(ctx context.Context, in *pb.SetSystemProxyEnabledRequest) (*pb.Response, error) {
-	err := libbox.NewStandaloneCommandClient().SetSystemProxyEnabled(in.IsEnabled)
 
+func SetSystemProxyEnabled(
+	ctx context.Context,
+	in *pb.SetSystemProxyEnabledRequest,
+) (*pb.Response, error) {
+	err := libbox.NewStandaloneCommandClient().SetSystemProxyEnabled(in.GetIsEnabled())
 	if err != nil {
 		return &pb.Response{
 			ResponseCode: pb.ResponseCode_FAILED,
@@ -40,5 +49,4 @@ func SetSystemProxyEnabled(ctx context.Context, in *pb.SetSystemProxyEnabledRequ
 		ResponseCode: pb.ResponseCode_OK,
 		Message:      "",
 	}, nil
-
 }

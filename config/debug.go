@@ -21,7 +21,7 @@ func SaveCurrentConfig(path string, options option.Options) error {
 	if err != nil {
 		return err
 	}
-	return os.WriteFile(p, []byte(json), 0644)
+	return os.WriteFile(p, []byte(json), 0o644)
 }
 
 func ToJson(options option.Options) (string, error) {

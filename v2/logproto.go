@@ -17,14 +17,12 @@ var logObserver = NewObserver[pb.LogMessage](10)
 func Log(level pb.LogLevel, typ pb.LogType, message string) {
 	if level != pb.LogLevel_DEBUG {
 		fmt.Printf("%s %s %s\n", level, typ, message)
-
 	}
 	logObserver.Emit(pb.LogMessage{
 		Level:   level,
 		Type:    typ,
 		Message: message,
 	})
-
 }
 
 func (s *CoreService) LogListener(stream pb.Core_LogListenerServer) error {

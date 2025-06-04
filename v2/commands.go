@@ -8,9 +8,11 @@ import (
 	"github.com/sagernet/sing-box/experimental/libbox"
 )
 
-var systemInfoObserver = NewObserver[pb.SystemInfo](10)
-var outboundsInfoObserver = NewObserver[pb.OutboundGroupList](10)
-var mainOutboundsInfoObserver = NewObserver[pb.OutboundGroupList](10)
+var (
+	systemInfoObserver        = NewObserver[pb.SystemInfo](10)
+	outboundsInfoObserver     = NewObserver[pb.OutboundGroupList](10)
+	mainOutboundsInfoObserver = NewObserver[pb.OutboundGroupList](10)
+)
 
 var (
 	statusClient        *libbox.CommandClient
@@ -24,7 +26,7 @@ func (s *CoreService) GetSystemInfo(stream pb.Core_GetSystemInfoServer) error {
 			&CommandClientHandler{},
 			&libbox.CommandClientOptions{
 				Command:        libbox.CommandStatus,
-				StatusInterval: 1000000000, //1000ms debounce
+				StatusInterval: 1000000000, // 1000ms debounce
 			},
 		)
 
@@ -60,7 +62,7 @@ func (s *CoreService) OutboundsInfo(stream pb.Core_OutboundsInfoServer) error {
 			&CommandClientHandler{},
 			&libbox.CommandClientOptions{
 				Command:        libbox.CommandGroup,
-				StatusInterval: 500000000, //500ms debounce
+				StatusInterval: 500000000, // 500ms debounce
 			},
 		)
 
@@ -95,8 +97,8 @@ func (s *CoreService) MainOutboundsInfo(stream pb.Core_MainOutboundsInfoServer) 
 		groupInfoOnlyClient = libbox.NewCommandClient(
 			&CommandClientHandler{},
 			&libbox.CommandClientOptions{
-				Command:        libbox.CommandGroupInfoOnly,
-				StatusInterval: 500000000, //500ms debounce
+				Command:        libbox.CommandGroup,
+				StatusInterval: 500000000, // 500ms debounce
 			},
 		)
 
@@ -126,12 +128,15 @@ func (s *CoreService) MainOutboundsInfo(stream pb.Core_MainOutboundsInfoServer) 
 	}
 }
 
-func (s *CoreService) SelectOutbound(ctx context.Context, in *pb.SelectOutboundRequest) (*pb.Response, error) {
+func (s *CoreService) SelectOutbound(
+	ctx context.Context,
+	in *pb.SelectOutboundRequest,
+) (*pb.Response, error) {
 	return SelectOutbound(in)
 }
-func SelectOutbound(in *pb.SelectOutboundRequest) (*pb.Response, error) {
-	err := libbox.NewStandaloneCommandClient().SelectOutbound(in.GroupTag, in.OutboundTag)
 
+func SelectOutbound(in *pb.SelectOutboundRequest) (*pb.Response, error) {
+	err := libbox.NewStandaloneCommandClient().SelectOutbound(in.GetGroupTag(), in.GetOutboundTag())
 	if err != nil {
 		return &pb.Response{
 			ResponseCode: pb.ResponseCode_FAILED,
@@ -148,9 +153,9 @@ func SelectOutbound(in *pb.SelectOutboundRequest) (*pb.Response, error) {
 func (s *CoreService) UrlTest(ctx context.Context, in *pb.UrlTestRequest) (*pb.Response, error) {
 	return UrlTest(in)
 }
-func UrlTest(in *pb.UrlTestRequest) (*pb.Response, error) {
-	err := libbox.NewStandaloneCommandClient().URLTest(in.GroupTag)
 
+func UrlTest(in *pb.UrlTestRequest) (*pb.Response, error) {
+	err := libbox.NewStandaloneCommandClient().URLTest(in.GetGroupTag())
 	if err != nil {
 		return &pb.Response{
 			ResponseCode: pb.ResponseCode_FAILED,
@@ -162,5 +167,4 @@ func UrlTest(in *pb.UrlTestRequest) (*pb.Response, error) {
 		ResponseCode: pb.ResponseCode_OK,
 		Message:      "",
 	}, nil
-
 }

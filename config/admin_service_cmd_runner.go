@@ -3,6 +3,7 @@
 package config
 
 import (
+	"errors"
 	"fmt"
 	"os"
 	"os/exec"
@@ -15,7 +16,7 @@ func ExecuteCmd(executablePath string, background bool, args ...string) (string,
 	if appimage := os.Getenv("APPIMAGE"); appimage != "" {
 		executablePath = appimage
 		if !background {
-			return "Fail", fmt.Errorf("Appimage cannot have service")
+			return "Fail", errors.New("Appimage cannot have service")
 		}
 	}
 
@@ -45,5 +46,5 @@ func ExecuteCmd(executablePath string, background bool, args ...string) (string,
 		}
 	}
 
-	return "", fmt.Errorf("Error executing run as root shell command")
+	return "", errors.New("Error executing run as root shell command")
 }

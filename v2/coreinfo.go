@@ -9,8 +9,10 @@ import (
 	pb "github.com/hiddify/hiddify-core/hiddifyrpc"
 )
 
-var coreInfoObserver = NewObserver[pb.CoreInfoResponse](10)
-var CoreState = pb.CoreState_STOPPED
+var (
+	coreInfoObserver = NewObserver[pb.CoreInfoResponse](10)
+	CoreState        = pb.CoreState_STOPPED
+)
 
 func SetCoreStatus(state pb.CoreState, msgType pb.MessageType, message string) pb.CoreInfoResponse {
 	msg := fmt.Sprintf("%s: %s %s", state.String(), msgType.String(), message)
@@ -30,7 +32,6 @@ func SetCoreStatus(state pb.CoreState, msgType pb.MessageType, message string) p
 		bridge.SendStringToPort(statusPropagationPort, string(msg))
 	}
 	return info
-
 }
 
 func (s *CoreService) CoreInfoListener(stream pb.Core_CoreInfoListenerServer) error {

@@ -4,7 +4,6 @@ import (
 	"context"
 	"io"
 	"os"
-	"runtime"
 	runtimeDebug "runtime/debug"
 	"time"
 
@@ -27,10 +26,13 @@ var (
 	statusPropagationPort int64
 )
 
-func Setup(basePath string, workingPath string, tempPath string, statusPort int64, debug bool) error {
+func Setup(basePath, workingPath, tempPath string, statusPort int64, debug bool) error {
 	statusPropagationPort = int64(statusPort)
-	tcpConn := runtime.GOOS == "windows" //TODO add TVOS
-	libbox.Setup(basePath, workingPath, tempPath, tcpConn)
+	libbox.Setup(&libbox.SetupOptions{
+		BasePath:    basePath,
+		WorkingPath: workingPath,
+		TempPath:    tempPath,
+	})
 	sWorkingPath = workingPath
 	os.Chdir(sWorkingPath)
 	sTempPath = tempPath
@@ -83,7 +85,7 @@ func NewService(options option.Options) (*libbox.BoxService, error) {
 
 func readOptions(configContent string) (option.Options, error) {
 	var options option.Options
-	err := options.UnmarshalJSON([]byte(configContent))
+	err := options.UnmarshalJSONContext(context.Background(), []byte(configContent))
 	if err != nil {
 		return option.Options{}, E.Cause(err, "decode config")
 	}

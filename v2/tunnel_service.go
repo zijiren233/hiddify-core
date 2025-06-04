@@ -5,17 +5,27 @@ import (
 	"fmt"
 	"log"
 	"os"
+	"strconv"
 
 	pb "github.com/hiddify/hiddify-core/hiddifyrpc"
 )
 
-func (s *TunnelService) Start(ctx context.Context, in *pb.TunnelStartRequest) (*pb.TunnelResponse, error) {
-	if in.ServerPort == 0 {
+func (s *TunnelService) Start(
+	ctx context.Context,
+	in *pb.TunnelStartRequest,
+) (*pb.TunnelResponse, error) {
+	if in.GetServerPort() == 0 {
 		in.ServerPort = 12334
 	}
 	useFlutterBridge = false
 	res, err := Start(&pb.StartRequest{
-		ConfigContent:          makeTunnelConfig(in.Ipv6, in.ServerPort, in.StrictRoute, in.EndpointIndependentNat, in.Stack),
+		ConfigContent: makeTunnelConfig(
+			in.GetIpv6(),
+			in.GetServerPort(),
+			in.GetStrictRoute(),
+			in.GetEndpointIndependentNat(),
+			in.GetStack(),
+		),
 		EnableOldCommandServer: false,
 		DisableMemoryLimit:     true,
 		EnableRawConfig:        true,
@@ -31,7 +41,12 @@ func (s *TunnelService) Start(ctx context.Context, in *pb.TunnelStartRequest) (*
 	}, err
 }
 
-func makeTunnelConfig(Ipv6 bool, ServerPort int32, StrictRoute bool, EndpointIndependentNat bool, Stack string) string {
+func makeTunnelConfig(
+	Ipv6 bool,
+	ServerPort int32,
+	StrictRoute, EndpointIndependentNat bool,
+	Stack string,
+) string {
 	var ipv6 string
 	if Ipv6 {
 		ipv6 = `      "inet6_address": "fdfe:dcba:9876::1/126",`
@@ -50,8 +65,8 @@ func makeTunnelConfig(Ipv6 bool, ServerPort int32, StrictRoute bool, EndpointInd
 			"inet4_address": "172.19.0.1/30",
 			` + ipv6 + `
 			"auto_route": true,
-			"strict_route": ` + fmt.Sprintf("%t", StrictRoute) + `,
-			"endpoint_independent_nat": ` + fmt.Sprintf("%t", EndpointIndependentNat) + `,
+			"strict_route": ` + strconv.FormatBool(StrictRoute) + `,
+			"endpoint_independent_nat": ` + strconv.FormatBool(EndpointIndependentNat) + `,
 			"stack": "` + Stack + `"
 		  }
 		],
@@ -60,7 +75,7 @@ func makeTunnelConfig(Ipv6 bool, ServerPort int32, StrictRoute bool, EndpointInd
 			"type": "socks",
 			"tag": "socks-out",
 			"server": "127.0.0.1",
-			"server_port": ` + fmt.Sprintf("%d", ServerPort) + `,
+			"server_port": ` + strconv.Itoa(int(ServerPort)) + `,
 			"version": "5"
 		  },
 		  {
@@ -99,12 +114,13 @@ func (s *TunnelService) Stop(ctx context.Context, _ *pb.Empty) (*pb.TunnelRespon
 		Message: "OK",
 	}, err
 }
-func (s *TunnelService) Status(ctx context.Context, _ *pb.Empty) (*pb.TunnelResponse, error) {
 
+func (s *TunnelService) Status(ctx context.Context, _ *pb.Empty) (*pb.TunnelResponse, error) {
 	return &pb.TunnelResponse{
 		Message: "Not Implemented",
 	}, nil
 }
+
 func (s *TunnelService) Exit(ctx context.Context, _ *pb.Empty) (*pb.TunnelResponse, error) {
 	Stop()
 	os.Exit(0)

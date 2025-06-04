@@ -1,4 +1,6 @@
+//go:build cgo
 // +build cgo
+
 package bridge
 
 // #include "stdint.h"
@@ -10,6 +12,7 @@ package bridge
 //   return Dart_PostCObject_DL(port, obj);
 // }
 import "C"
+
 import (
 	"fmt"
 	"unsafe"

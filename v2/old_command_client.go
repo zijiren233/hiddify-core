@@ -9,13 +9,19 @@ import (
 	"github.com/sagernet/sing-box/log"
 )
 
-var (
-	_ libbox.CommandClientHandler = (*OldCommandClientHandler)(nil)
-)
+var _ libbox.CommandClientHandler = (*OldCommandClientHandler)(nil)
 
 type OldCommandClientHandler struct {
 	port   int64
 	logger log.Logger
+}
+
+// WriteConnections implements libbox.CommandClientHandler.
+func (cch *OldCommandClientHandler) WriteConnections(message *libbox.Connections) {
+}
+
+// WriteLogs implements libbox.CommandClientHandler.
+func (cch *OldCommandClientHandler) WriteLogs(messageList libbox.StringIterator) {
 }
 
 func (cch *OldCommandClientHandler) Connected() {
@@ -26,8 +32,8 @@ func (cch *OldCommandClientHandler) Disconnected(message string) {
 	cch.logger.Debug("DISCONNECTED: ", message)
 }
 
-func (cch *OldCommandClientHandler) ClearLog() {
-	cch.logger.Debug("clear log")
+func (cch *OldCommandClientHandler) ClearLogs() {
+	cch.logger.Debug("clear logs")
 }
 
 func (cch *OldCommandClientHandler) WriteLog(message string) {
@@ -45,7 +51,12 @@ func (cch *OldCommandClientHandler) WriteStatus(message *libbox.StatusMessage) {
 			"downlink-total":  message.DownlinkTotal,
 		},
 	)
-	cch.logger.Debug("Memory: ", libbox.FormatBytes(message.Memory), ", Goroutines: ", message.Goroutines)
+	cch.logger.Debug(
+		"Memory: ",
+		libbox.FormatBytes(message.Memory),
+		", Goroutines: ",
+		message.Goroutines,
+	)
 	if err != nil {
 		bridge.SendStringToPort(cch.port, fmt.Sprintf("error: %e", err))
 	} else {
@@ -73,7 +84,15 @@ func (cch *OldCommandClientHandler) WriteGroups(message libbox.OutboundGroupIter
 				},
 			)
 		}
-		groups = append(groups, &OutboundGroup{Tag: group.Tag, Type: group.Type, Selected: group.Selected, Items: groupItems})
+		groups = append(
+			groups,
+			&OutboundGroup{
+				Tag:      group.Tag,
+				Type:     group.Type,
+				Selected: group.Selected,
+				Items:    groupItems,
+			},
+		)
 	}
 	response, err := json.Marshal(groups)
 	if err != nil {
@@ -83,7 +102,10 @@ func (cch *OldCommandClientHandler) WriteGroups(message libbox.OutboundGroupIter
 	}
 }
 
-func (cch *OldCommandClientHandler) InitializeClashMode(modeList libbox.StringIterator, currentMode string) {
+func (cch *OldCommandClientHandler) InitializeClashMode(
+	modeList libbox.StringIterator,
+	currentMode string,
+) {
 	cch.logger.Debug("initial clash mode: ", currentMode)
 }
 

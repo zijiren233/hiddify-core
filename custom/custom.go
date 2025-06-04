@@ -4,13 +4,13 @@ package main
 #include "stdint.h"
 */
 import "C"
+
 import (
 	"unsafe"
 
 	"github.com/hiddify/hiddify-core/bridge"
 	pb "github.com/hiddify/hiddify-core/hiddifyrpc"
 	v2 "github.com/hiddify/hiddify-core/v2"
-
 	"github.com/sagernet/sing-box/log"
 )
 
@@ -20,15 +20,20 @@ func setupOnce(api unsafe.Pointer) {
 }
 
 //export setup
-func setup(baseDir *C.char, workingDir *C.char, tempDir *C.char, statusPort C.longlong, debug bool) (CErr *C.char) {
-	err := v2.Setup(C.GoString(baseDir), C.GoString(workingDir), C.GoString(tempDir), int64(statusPort), debug)
+func setup(baseDir, workingDir, tempDir *C.char, statusPort C.longlong, debug bool) (CErr *C.char) {
+	err := v2.Setup(
+		C.GoString(baseDir),
+		C.GoString(workingDir),
+		C.GoString(tempDir),
+		int64(statusPort),
+		debug,
+	)
 
 	return emptyOrErrorC(err)
 }
 
 //export start
 func start(config *C.char, disableMemoryLimit bool) (CErr *C.char) {
-
 	_, err := v2.Start(&pb.StartRequest{
 		ConfigContent:          C.GoString(config),
 		EnableOldCommandServer: true,
@@ -39,14 +44,12 @@ func start(config *C.char, disableMemoryLimit bool) (CErr *C.char) {
 
 //export stop
 func stop() (CErr *C.char) {
-
 	_, err := v2.Stop()
 	return emptyOrErrorC(err)
 }
 
 //export restart
 func restart(config *C.char, disableMemoryLimit bool) (CErr *C.char) {
-
 	_, err := v2.Restart(&pb.StartRequest{
 		ConfigContent:          C.GoString(config),
 		EnableOldCommandServer: true,
@@ -68,8 +71,7 @@ func stopCommandClient(command C.int) *C.char {
 }
 
 //export selectOutbound
-func selectOutbound(groupTag *C.char, outboundTag *C.char) (CErr *C.char) {
-
+func selectOutbound(groupTag, outboundTag *C.char) (CErr *C.char) {
 	_, err := v2.SelectOutbound(&pb.SelectOutboundRequest{
 		GroupTag:    C.GoString(groupTag),
 		OutboundTag: C.GoString(outboundTag),

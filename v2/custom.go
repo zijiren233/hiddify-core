@@ -3,9 +3,7 @@ package v2
 import (
 	"context"
 	"encoding/json"
-	"fmt"
-	"os"
-	"path/filepath"
+	"errors"
 	"time"
 
 	"github.com/hiddify/hiddify-core/bridge"
@@ -17,15 +15,12 @@ import (
 
 var (
 	Box              *libbox.BoxService
-	configOptions    *config.ConfigOptions = config.DefaultConfigOptions()
-	activeConfigPath string
 	coreLogFactory   log.Factory
 	useFlutterBridge bool = true
 )
 
 func StopAndAlert(msgType pb.MessageType, message string) {
 	SetCoreStatus(pb.CoreState_STOPPED, msgType, message)
-	config.DeactivateTunnelService()
 	if oldCommandServer != nil {
 		oldCommandServer.SetService(nil)
 	}
@@ -38,12 +33,17 @@ func StopAndAlert(msgType pb.MessageType, message string) {
 	}
 	if useFlutterBridge {
 		alert := msgType.String()
-		msg, _ := json.Marshal(StatusMessage{Status: convert2OldState(CoreState), Alert: &alert, Message: &message})
+		msg, _ := json.Marshal(
+			StatusMessage{Status: convert2OldState(CoreState), Alert: &alert, Message: &message},
+		)
 		bridge.SendStringToPort(statusPropagationPort, string(msg))
 	}
 }
 
-func (s *CoreService) Start(ctx context.Context, in *pb.StartRequest) (*pb.CoreInfoResponse, error) {
+func (s *CoreService) Start(
+	ctx context.Context,
+	in *pb.StartRequest,
+) (*pb.CoreInfoResponse, error) {
 	return Start(in)
 }
 
@@ -63,28 +63,21 @@ func Start(in *pb.StartRequest) (*pb.CoreInfoResponse, error) {
 	}
 	Log(pb.LogLevel_DEBUG, pb.LogType_CORE, "Starting Core")
 	SetCoreStatus(pb.CoreState_STARTING, pb.MessageType_EMPTY, "")
-	libbox.SetMemoryLimit(!in.DisableMemoryLimit)
+	libbox.SetMemoryLimit(!in.GetDisableMemoryLimit())
 	resp, err := StartService(in)
 	return resp, err
 }
-func (s *CoreService) StartService(ctx context.Context, in *pb.StartRequest) (*pb.CoreInfoResponse, error) {
+
+func (s *CoreService) StartService(
+	ctx context.Context,
+	in *pb.StartRequest,
+) (*pb.CoreInfoResponse, error) {
 	return StartService(in)
 }
+
 func StartService(in *pb.StartRequest) (*pb.CoreInfoResponse, error) {
 	Log(pb.LogLevel_DEBUG, pb.LogType_CORE, "Starting Core Service")
-	content := in.ConfigContent
-	if content == "" {
-
-		activeConfigPath = in.ConfigPath
-		fileContent, err := os.ReadFile(activeConfigPath)
-		if err != nil {
-			Log(pb.LogLevel_FATAL, pb.LogType_CORE, err.Error())
-			resp := SetCoreStatus(pb.CoreState_STOPPED, pb.MessageType_ERROR_READING_CONFIG, err.Error())
-			StopAndAlert(pb.MessageType_UNEXPECTED_ERROR, err.Error())
-			return &resp, err
-		}
-		content = string(fileContent)
-	}
+	content := in.GetConfigContent()
 	Log(pb.LogLevel_DEBUG, pb.LogType_CORE, "Parsing Config")
 
 	parsedContent, err := readOptions(content)
@@ -92,36 +85,25 @@ func StartService(in *pb.StartRequest) (*pb.CoreInfoResponse, error) {
 
 	if err != nil {
 		Log(pb.LogLevel_FATAL, pb.LogType_CORE, err.Error())
-		resp := SetCoreStatus(pb.CoreState_STOPPED, pb.MessageType_ERROR_PARSING_CONFIG, err.Error())
+		resp := SetCoreStatus(
+			pb.CoreState_STOPPED,
+			pb.MessageType_ERROR_PARSING_CONFIG,
+			err.Error(),
+		)
 		StopAndAlert(pb.MessageType_UNEXPECTED_ERROR, err.Error())
 		return &resp, err
 	}
-	if !in.EnableRawConfig {
-		Log(pb.LogLevel_DEBUG, pb.LogType_CORE, "Building config")
-		if configOptions == nil {
-			configOptions = config.DefaultConfigOptions()
-		}
-		parsedContent_tmp, err := config.BuildConfig(*configOptions, parsedContent)
-		if err != nil {
-			Log(pb.LogLevel_FATAL, pb.LogType_CORE, err.Error())
-			resp := SetCoreStatus(pb.CoreState_STOPPED, pb.MessageType_ERROR_BUILDING_CONFIG, err.Error())
-			StopAndAlert(pb.MessageType_UNEXPECTED_ERROR, err.Error())
-			return &resp, err
-		}
-		parsedContent = *parsedContent_tmp
-	}
 	Log(pb.LogLevel_DEBUG, pb.LogType_CORE, "Saving config")
-	currentBuildConfigPath := filepath.Join(sWorkingPath, "current-config.json")
-	config.SaveCurrentConfig(currentBuildConfigPath, parsedContent)
-	if activeConfigPath == "" {
-		activeConfigPath = currentBuildConfigPath
-	}
-	if in.EnableOldCommandServer {
+	if in.GetEnableOldCommandServer() {
 		Log(pb.LogLevel_DEBUG, pb.LogType_CORE, "Starting Command Server")
 		err = startCommandServer()
 		if err != nil {
 			Log(pb.LogLevel_FATAL, pb.LogType_CORE, err.Error())
-			resp := SetCoreStatus(pb.CoreState_STOPPED, pb.MessageType_START_COMMAND_SERVER, err.Error())
+			resp := SetCoreStatus(
+				pb.CoreState_STOPPED,
+				pb.MessageType_START_COMMAND_SERVER,
+				err.Error(),
+			)
 			StopAndAlert(pb.MessageType_UNEXPECTED_ERROR, err.Error())
 			return &resp, err
 		}
@@ -129,7 +111,6 @@ func StartService(in *pb.StartRequest) (*pb.CoreInfoResponse, error) {
 
 	Log(pb.LogLevel_DEBUG, pb.LogType_CORE, "Stating Service ")
 	instance, err := NewService(parsedContent)
-
 	if err != nil {
 		Log(pb.LogLevel_FATAL, pb.LogType_CORE, err.Error())
 		resp := SetCoreStatus(pb.CoreState_STOPPED, pb.MessageType_CREATE_SERVICE, err.Error())
@@ -137,7 +118,7 @@ func StartService(in *pb.StartRequest) (*pb.CoreInfoResponse, error) {
 		return &resp, err
 	}
 	Log(pb.LogLevel_DEBUG, pb.LogType_CORE, "Service.. started")
-	if in.DelayStart {
+	if in.GetDelayStart() {
 		<-time.After(250 * time.Millisecond)
 	}
 
@@ -149,35 +130,18 @@ func StartService(in *pb.StartRequest) (*pb.CoreInfoResponse, error) {
 		return &resp, err
 	}
 	Box = instance
-	if in.EnableOldCommandServer {
+	if in.GetEnableOldCommandServer() {
 		oldCommandServer.SetService(Box)
 	}
 
 	resp := SetCoreStatus(pb.CoreState_STARTED, pb.MessageType_EMPTY, "")
 	return &resp, nil
-
-}
-
-func generateConfigFromFile(path string, configOpt config.ConfigOptions) (string, error) {
-	os.Chdir(filepath.Dir(path))
-	content, err := os.ReadFile(path)
-	if err != nil {
-		return "", err
-	}
-	options, err := readOptions(string(content))
-	if err != nil {
-		return "", err
-	}
-	config, err := config.BuildConfigJson(configOpt, options)
-	if err != nil {
-		return "", err
-	}
-	return config, nil
 }
 
 func (s *CoreService) Stop(ctx context.Context, empty *pb.Empty) (*pb.CoreInfoResponse, error) {
 	return Stop()
 }
+
 func Stop() (*pb.CoreInfoResponse, error) {
 	defer config.DeferPanicToError("stop", func(err error) {
 		Log(pb.LogLevel_FATAL, pb.LogType_CORE, err.Error())
@@ -190,17 +154,16 @@ func Stop() (*pb.CoreInfoResponse, error) {
 			CoreState:   CoreState,
 			MessageType: pb.MessageType_INSTANCE_NOT_STARTED,
 			Message:     "instance is not started",
-		}, fmt.Errorf("instance not started")
+		}, errors.New("instance not started")
 	}
 	if Box == nil {
 		return &pb.CoreInfoResponse{
 			CoreState:   CoreState,
 			MessageType: pb.MessageType_INSTANCE_NOT_FOUND,
 			Message:     "instance is not found",
-		}, fmt.Errorf("instance not found")
+		}, errors.New("instance not found")
 	}
 	SetCoreStatus(pb.CoreState_STOPPING, pb.MessageType_EMPTY, "")
-	config.DeactivateTunnelService()
 	if oldCommandServer != nil {
 		oldCommandServer.SetService(nil)
 	}
@@ -211,7 +174,7 @@ func Stop() (*pb.CoreInfoResponse, error) {
 			CoreState:   CoreState,
 			MessageType: pb.MessageType_UNEXPECTED_ERROR,
 			Message:     "Error while stopping the service.",
-		}, fmt.Errorf("Error while stopping the service.")
+		}, errors.New("Error while stopping the service.")
 	}
 	Box = nil
 	if oldCommandServer != nil {
@@ -221,17 +184,21 @@ func Stop() (*pb.CoreInfoResponse, error) {
 				CoreState:   CoreState,
 				MessageType: pb.MessageType_UNEXPECTED_ERROR,
 				Message:     "Error while Closing the comand server.",
-			}, fmt.Errorf("error while Closing the comand server.")
+			}, errors.New("error while Closing the comand server.")
 		}
 		oldCommandServer = nil
 	}
 	resp := SetCoreStatus(pb.CoreState_STOPPED, pb.MessageType_EMPTY, "")
 	return &resp, nil
-
 }
-func (s *CoreService) Restart(ctx context.Context, in *pb.StartRequest) (*pb.CoreInfoResponse, error) {
+
+func (s *CoreService) Restart(
+	ctx context.Context,
+	in *pb.StartRequest,
+) (*pb.CoreInfoResponse, error) {
 	return Restart(in)
 }
+
 func Restart(in *pb.StartRequest) (*pb.CoreInfoResponse, error) {
 	defer config.DeferPanicToError("restart", func(err error) {
 		Log(pb.LogLevel_FATAL, pb.LogType_CORE, err.Error())
@@ -244,14 +211,14 @@ func Restart(in *pb.StartRequest) (*pb.CoreInfoResponse, error) {
 			CoreState:   CoreState,
 			MessageType: pb.MessageType_INSTANCE_NOT_STARTED,
 			Message:     "instance is not started",
-		}, fmt.Errorf("instance not started")
+		}, errors.New("instance not started")
 	}
 	if Box == nil {
 		return &pb.CoreInfoResponse{
 			CoreState:   CoreState,
 			MessageType: pb.MessageType_INSTANCE_NOT_FOUND,
 			Message:     "instance is not found",
-		}, fmt.Errorf("instance not found")
+		}, errors.New("instance not found")
 	}
 
 	resp, err := Stop()
@@ -262,7 +229,7 @@ func Restart(in *pb.StartRequest) (*pb.CoreInfoResponse, error) {
 	SetCoreStatus(pb.CoreState_STARTING, pb.MessageType_EMPTY, "")
 	<-time.After(250 * time.Millisecond)
 
-	libbox.SetMemoryLimit(!in.DisableMemoryLimit)
+	libbox.SetMemoryLimit(!in.GetDisableMemoryLimit())
 	resp, gErr := StartService(in)
 	return resp, gErr
 }

@@ -8,25 +8,28 @@ import (
 	pb "github.com/hiddify/hiddify-core/hiddifyrpc"
 )
 
-func (s *HelloService) SayHello(ctx context.Context, in *pb.HelloRequest) (*pb.HelloResponse, error) {
-	return &pb.HelloResponse{Message: "Hello, " + in.Name}, nil
+func (s *HelloService) SayHello(
+	ctx context.Context,
+	in *pb.HelloRequest,
+) (*pb.HelloResponse, error) {
+	return &pb.HelloResponse{Message: "Hello, " + in.GetName()}, nil
 }
-func (s *HelloService) SayHelloStream(stream pb.Hello_SayHelloStreamServer) error {
 
+func (s *HelloService) SayHelloStream(stream pb.Hello_SayHelloStreamServer) error {
 	for {
 		req, err := stream.Recv()
 		if err != nil {
 			log.Printf("stream.Recv() failed: %v", err)
 			break
 		}
-		log.Printf("Received: %v", req.Name)
+		log.Printf("Received: %v", req.GetName())
 		time.Sleep(1 * time.Second)
-		err = stream.Send(&pb.HelloResponse{Message: "Hello, " + req.Name})
+		err = stream.Send(&pb.HelloResponse{Message: "Hello, " + req.GetName()})
 		if err != nil {
 			log.Printf("stream.Send() failed: %v", err)
 			break
 		}
-		err = stream.Send(&pb.HelloResponse{Message: "Hello again, " + req.Name})
+		err = stream.Send(&pb.HelloResponse{Message: "Hello again, " + req.GetName()})
 		if err != nil {
 			log.Printf("stream.Send() failed: %v", err)
 			break

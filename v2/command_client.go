@@ -19,8 +19,14 @@ func (cch *CommandClientHandler) Disconnected(message string) {
 	cch.logger.Debug("DISCONNECTED: ", message)
 }
 
-func (cch *CommandClientHandler) ClearLog() {
-	cch.logger.Debug("clear log")
+func (cch *CommandClientHandler) ClearLogs() {
+	cch.logger.Debug("clear logs")
+}
+
+func (cch *CommandClientHandler) WriteLogs(libbox.StringIterator) {
+}
+
+func (cch *CommandClientHandler) WriteConnections(*libbox.Connections) {
 }
 
 func (cch *CommandClientHandler) WriteLog(message string) {
@@ -38,8 +44,12 @@ func (cch *CommandClientHandler) WriteStatus(message *libbox.StatusMessage) {
 		Memory:         message.Memory,
 		Goroutines:     message.Goroutines,
 	})
-	cch.logger.Debug("Memory: ", libbox.FormatBytes(message.Memory), ", Goroutines: ", message.Goroutines)
-
+	cch.logger.Debug(
+		"Memory: ",
+		libbox.FormatBytes(message.Memory),
+		", Goroutines: ",
+		message.Goroutines,
+	)
 }
 
 func (cch *CommandClientHandler) WriteGroups(message libbox.OutboundGroupIterator) {
@@ -62,13 +72,24 @@ func (cch *CommandClientHandler) WriteGroups(message libbox.OutboundGroupIterato
 				},
 			)
 		}
-		groups.Items = append(groups.Items, &pb.OutboundGroup{Tag: group.Tag, Type: group.Type, Selected: group.Selected, Items: groupItems})
+		groups.Items = append(
+			groups.Items,
+			&pb.OutboundGroup{
+				Tag:      group.Tag,
+				Type:     group.Type,
+				Selected: group.Selected,
+				Items:    groupItems,
+			},
+		)
 	}
 	outboundsInfoObserver.Emit(groups)
 	mainOutboundsInfoObserver.Emit(groups)
 }
 
-func (cch *CommandClientHandler) InitializeClashMode(modeList libbox.StringIterator, currentMode string) {
+func (cch *CommandClientHandler) InitializeClashMode(
+	modeList libbox.StringIterator,
+	currentMode string,
+) {
 	cch.logger.Debug("initial clash mode: ", currentMode)
 }
 

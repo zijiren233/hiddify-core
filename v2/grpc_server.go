@@ -23,19 +23,19 @@ type TunnelService struct {
 	pb.UnimplementedTunnelServiceServer
 }
 
-func StartGrpcServer(listenAddressG string, service string) error {
-
+func StartGrpcServer(listenAddressG, service string) error {
 	lis, err := net.Listen("tcp", listenAddressG)
 	if err != nil {
 		log.Printf("failed to listen: %v", err)
 		return err
 	}
 	s := grpc.NewServer()
-	if service == "core" {
+	switch service {
+	case "core":
 		pb.RegisterCoreServer(s, &CoreService{})
-	} else if service == "hello" {
+	case "hello":
 		pb.RegisterHelloServer(s, &HelloService{})
-	} else if service == "tunnel" {
+	case "tunnel":
 		pb.RegisterTunnelServiceServer(s, &TunnelService{})
 	}
 	log.Printf("Server listening on %s", listenAddressG)
@@ -46,6 +46,7 @@ func StartGrpcServer(listenAddressG string, service string) error {
 	}()
 	return nil
 }
+
 func StartCoreGrpcServer(listenAddressG string) error {
 	return StartGrpcServer(listenAddressG, "core")
 }
