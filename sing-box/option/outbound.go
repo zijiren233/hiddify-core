@@ -84,7 +84,7 @@ type DialerOptions struct {
 	FallbackNetworkType badoption.Listable[InterfaceType] `json:"fallback_network_type,omitempty"`
 	FallbackDelay       badoption.Duration                `json:"fallback_delay,omitempty"`
 
-	WsTunnel *WsTunnel `json:"ws_tunnel,omitempty"`
+	WsTunnel WsTunnel `json:"ws_tunnel,omitempty"`
 
 	// Deprecated: migrated to domain resolver
 	DomainStrategy DomainStrategy `json:"domain_strategy,omitempty"`

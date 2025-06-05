@@ -97,7 +97,7 @@ func (s *CoreService) MainOutboundsInfo(stream pb.Core_MainOutboundsInfoServer) 
 		groupInfoOnlyClient = libbox.NewCommandClient(
 			&CommandClientHandler{},
 			&libbox.CommandClientOptions{
-				Command:        libbox.CommandGroup,
+				Command:        libbox.CommandGroupInfoOnly,
 				StatusInterval: 500000000, // 500ms debounce
 			},
 		)

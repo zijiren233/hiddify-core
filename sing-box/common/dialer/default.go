@@ -21,6 +21,7 @@ import (
 	M "github.com/sagernet/sing/common/metadata"
 	N "github.com/sagernet/sing/common/network"
 	"github.com/sagernet/sing/service"
+	"github.com/zijiren233/gwst/ws"
 )
 
 var (
@@ -44,6 +45,8 @@ type DefaultDialer struct {
 	fallbackNetworkType    []C.InterfaceType
 	networkFallbackDelay   time.Duration
 	networkLastFallback    atomic.TypedValue[time.Time]
+
+	wsDialer *ws.Dialer
 }
 
 func NewDefault(ctx context.Context, options option.DialerOptions) (*DefaultDialer, error) {
@@ -203,7 +206,27 @@ func NewDefault(ctx context.Context, options option.DialerOptions) (*DefaultDial
 		networkType:            networkType,
 		fallbackNetworkType:    fallbackNetworkType,
 		networkFallbackDelay:   networkFallbackDelay,
+
+		wsDialer: newWsDialer(options.WsTunnel),
 	}, nil
+}
+
+func newWsDialer(options option.WsTunnel) *ws.Dialer {
+	if !options.Enabled {
+		return nil
+	}
+	return ws.NewDialer(
+		ws.WithHost(options.Host),
+		ws.WithPath(options.Path),
+		ws.WithKey(options.Key),
+		ws.WithFallbackAddrs(options.FallbackAddrs),
+		ws.WithLoadBalance(options.LoadBalance),
+		ws.WithDialTLS(options.TLS),
+		ws.WithDialServerName(options.ServerName),
+		ws.WithInsecure(options.Insecure),
+		ws.WithTarget(options.Target),
+		ws.WithNamedTarget(options.NamedTarget),
+	)
 }
 
 func setMarkWrapper(networkManager adapter.NetworkManager, mark uint32, isDefault bool) control.Func {
@@ -227,6 +250,14 @@ func (d *DefaultDialer) DialContext(ctx context.Context, network string, address
 		return nil, E.New("invalid address")
 	} else if address.IsFqdn() {
 		return nil, E.New("domain not resolved")
+	}
+	if d.wsDialer != nil {
+		switch N.NetworkName(network) {
+		case N.NetworkUDP:
+			return d.wsDialer.DialContextUDP(ctx, ws.WithAddr(address.String()))
+		case N.NetworkTCP:
+			return d.wsDialer.DialContextTCP(ctx, ws.WithAddr(address.String()))
+		}
 	}
 	if d.networkStrategy == nil {
 		return trackConn(listener.ListenNetworkNamespace[net.Conn](d.netns, func() (net.Conn, error) {

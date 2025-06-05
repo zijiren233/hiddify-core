@@ -28,7 +28,7 @@ func (c *CommandClient) handleGroupConn(conn net.Conn) {
 	}
 }
 
-func (s *CommandServer) handleGroupConn(conn net.Conn) error {
+func (s *CommandServer) handleGroupConn(conn net.Conn, onlyGroupitems bool) error {
 	var interval int64
 	err := binary.Read(conn, binary.BigEndian, &interval)
 	if err != nil {
@@ -41,7 +41,7 @@ func (s *CommandServer) handleGroupConn(conn net.Conn) error {
 	for {
 		service := s.service
 		if service != nil {
-			err = writeGroups(writer, service)
+			err = writeGroups(writer, service, onlyGroupitems)
 			if err != nil {
 				return err
 			}
@@ -106,7 +106,7 @@ func readGroups(reader io.Reader) (OutboundGroupIterator, error) {
 	return newIterator(groups), nil
 }
 
-func writeGroups(writer io.Writer, boxService *BoxService) error {
+func writeGroups(writer io.Writer, boxService *BoxService, onlyGroupitems bool) error {
 	historyStorage := service.PtrFromContext[urltest.HistoryStorage](boxService.ctx)
 	cacheFile := service.FromContext[adapter.CacheFile](boxService.ctx)
 	outbounds := boxService.instance.Outbound().Outbounds()
@@ -134,6 +134,9 @@ func writeGroups(writer io.Writer, boxService *BoxService) error {
 			if !isLoaded {
 				continue
 			}
+			if onlyGroupitems && itemTag != outboundGroup.Selected {
+				continue
+			}
 
 			var item OutboundGroupItem
 			item.Tag = itemTag
@@ -144,7 +147,7 @@ func writeGroups(writer io.Writer, boxService *BoxService) error {
 			}
 			outboundGroup.ItemList = append(outboundGroup.ItemList, &item)
 		}
-		if len(outboundGroup.ItemList) < 2 {
+		if len(outboundGroup.ItemList) < 2&& !onlyGroupitems {
 			continue
 		}
 		groups = append(groups, outboundGroup)

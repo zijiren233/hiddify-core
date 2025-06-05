@@ -97,7 +97,7 @@ func (c *CommandClient) Connect() error {
 		}
 		c.handler.Connected()
 		go c.handleStatusConn(conn)
-	case CommandGroup:
+	case CommandGroup, CommandGroupInfoOnly:
 		err = binary.Write(conn, binary.BigEndian, c.options.StatusInterval)
 		if err != nil {
 			return E.Cause(err, "write interval")
