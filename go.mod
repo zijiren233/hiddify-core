@@ -8,7 +8,7 @@ require (
 	github.com/kardianos/service v1.2.2
 	github.com/sagernet/gomobile v0.1.6
 	github.com/sagernet/sing v0.6.11-0.20250521033217-30d675ea099b
-	github.com/sagernet/sing-box v1.11.11
+	github.com/sagernet/sing-box v1.11.13
 	golang.org/x/sys v0.33.0
 	google.golang.org/grpc v1.72.0
 	google.golang.org/protobuf v1.36.6

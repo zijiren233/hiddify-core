@@ -43,7 +43,6 @@ require (
 	github.com/spf13/cobra v1.9.1
 	github.com/stretchr/testify v1.10.0
 	github.com/vishvananda/netns v0.0.5
-	github.com/zijiren233/gwst v0.4.8
 	go.uber.org/zap v1.27.0
 	go4.org/netipx v0.0.0-20231129151722-fdeea329fbba
 	golang.org/x/crypto v0.38.0
@@ -64,7 +63,7 @@ require (
 	github.com/ajg/form v1.5.1 // indirect
 	github.com/akutz/memconn v0.1.0 // indirect
 	github.com/alexbrainman/sspi v0.0.0-20231016080023-1a75b4708caa // indirect
-	github.com/andybalholm/brotli v1.1.1 // indirect
+	github.com/andybalholm/brotli v1.1.0 // indirect
 	github.com/bits-and-blooms/bitset v1.13.0 // indirect
 	github.com/caddyserver/zerossl v0.1.3 // indirect
 	github.com/cenkalti/backoff/v4 v4.3.0 // indirect
@@ -102,12 +101,10 @@ require (
 	github.com/mdlayher/sdnotify v1.0.0 // indirect
 	github.com/mdlayher/socket v0.5.1 // indirect
 	github.com/mitchellh/go-ps v1.0.0 // indirect
-	github.com/panjf2000/ants/v2 v2.10.0 // indirect
 	github.com/pierrec/lz4/v4 v4.1.21 // indirect
 	github.com/pmezard/go-difflib v1.0.1-0.20181226105442-5d4384ee4fb2 // indirect
 	github.com/prometheus-community/pro-bing v0.4.0 // indirect
 	github.com/quic-go/qpack v0.5.1 // indirect
-	github.com/refraction-networking/utls v1.6.7 // indirect
 	github.com/safchain/ethtool v0.3.0 // indirect
 	github.com/sagernet/netlink v0.0.0-20240612041022-b9a21c07ac6a // indirect
 	github.com/sagernet/nftables v0.3.0-beta.4 // indirect
@@ -123,7 +120,6 @@ require (
 	github.com/u-root/uio v0.0.0-20240224005618-d2acac8f3701 // indirect
 	github.com/x448/float16 v0.8.4 // indirect
 	github.com/zeebo/blake3 v0.2.4 // indirect
-	github.com/zijiren233/gencontainer v0.0.0-20241030052007-1f7025eb92f5 // indirect
 	go.uber.org/multierr v1.11.0 // indirect
 	go.uber.org/zap/exp v0.3.0 // indirect
 	go4.org/mem v0.0.0-20240501181205-ae6ca9944745 // indirect
