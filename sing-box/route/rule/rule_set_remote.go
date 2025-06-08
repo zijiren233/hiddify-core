@@ -16,6 +16,7 @@ import (
 	"github.com/sagernet/sing-box/common/srs"
 	C "github.com/sagernet/sing-box/constant"
 	"github.com/sagernet/sing-box/option"
+	"github.com/sagernet/sing-box/route/rule/geo"
 	"github.com/sagernet/sing/common"
 	"github.com/sagernet/sing/common/atomic"
 	E "github.com/sagernet/sing/common/exceptions"
@@ -247,6 +248,14 @@ func (s *RemoteRuleSet) fetch(ctx context.Context, startContext *adapter.HTTPSta
 			},
 		}
 	}
+
+	lastSegment := strings.Split(s.options.RemoteOptions.URL, "/")
+	filename := lastSegment[len(lastSegment)-1]
+	content, err := geo.FS.ReadFile(filename)
+	if err == nil {
+		return s.loadBytes(content)
+	}
+
 	request, err := http.NewRequest("GET", s.options.RemoteOptions.URL, nil)
 	if err != nil {
 		return err
@@ -278,7 +287,7 @@ func (s *RemoteRuleSet) fetch(ctx context.Context, startContext *adapter.HTTPSta
 	default:
 		return E.New("unexpected status: ", response.Status)
 	}
-	content, err := io.ReadAll(response.Body)
+	content, err = io.ReadAll(response.Body)
 	if err != nil {
 		response.Body.Close()
 		return err
