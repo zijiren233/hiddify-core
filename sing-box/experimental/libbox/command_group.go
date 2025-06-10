@@ -161,9 +161,7 @@ func writeGroups(writer io.Writer, boxService *BoxService, onlyGroupitems bool) 
 		}
 		groups = append(groups, outboundGroup)
 	}
-	if onlyGroupitems {
 		fmt.Println("onlyGroupitems", groups)
-	}
 	return varbin.Write(writer, binary.BigEndian, groups)
 }
 
