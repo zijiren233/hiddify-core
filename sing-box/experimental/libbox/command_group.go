@@ -3,6 +3,7 @@ package libbox
 import (
 	"bufio"
 	"encoding/binary"
+	"fmt"
 	"io"
 	"net"
 	"time"
@@ -40,8 +41,16 @@ func (s *CommandServer) handleGroupConn(conn net.Conn, onlyGroupitems bool) erro
 	writer := bufio.NewWriter(conn)
 	for {
 		service := s.service
+		if onlyGroupitems {
+			fmt.Println("onlyGroupitems")
+			fmt.Println(service)
+		}
 		if service != nil {
 			err = writeGroups(writer, service, onlyGroupitems)
+			if onlyGroupitems {
+				fmt.Println("onlyGroupitems")
+				fmt.Println(err)
+			}
 			if err != nil {
 				return err
 			}
@@ -151,6 +160,9 @@ func writeGroups(writer io.Writer, boxService *BoxService, onlyGroupitems bool) 
 			continue
 		}
 		groups = append(groups, outboundGroup)
+	}
+	if onlyGroupitems {
+		fmt.Println("onlyGroupitems", groups)
 	}
 	return varbin.Write(writer, binary.BigEndian, groups)
 }
