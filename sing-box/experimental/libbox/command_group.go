@@ -59,10 +59,6 @@ func (s *CommandServer) handleGroupConn(conn net.Conn, onlyGroupitems bool) erro
 		case <-ctx.Done():
 			return ctx.Err()
 		case <-ticker.C:
-		}
-		select {
-		case <-ctx.Done():
-			return ctx.Err()
 		case <-s.urlTestUpdate:
 		}
 	}
