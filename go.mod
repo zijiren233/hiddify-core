@@ -103,7 +103,7 @@ require (
 	github.com/sagernet/sing-shadowsocks v0.2.8 // indirect
 	github.com/sagernet/sing-shadowsocks2 v0.2.1 // indirect
 	github.com/sagernet/sing-shadowtls v0.2.1-0.20250503051639-fcd445d33c11 // indirect
-	github.com/sagernet/sing-tun v0.6.6-0.20250610083027-da0a50057fb5 // indirect
+	github.com/sagernet/sing-tun v0.6.8-0.20250615093440-d1f6001b58c2 // indirect
 	github.com/sagernet/sing-vmess v0.2.4-0.20250605032146-38cc72672c88 // indirect
 	github.com/sagernet/smux v1.5.34-mod.2 // indirect
 	github.com/sagernet/wireguard-go v0.0.1-beta.7 // indirect
