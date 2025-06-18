@@ -25,7 +25,7 @@ jobs:
             }
           - {
               name: "phantom-core-linux-amd64",
-              os: "ubuntu-22.04",
+              os: "ubuntu-latest",
               target: "linux-amd64",
             }
           - {
@@ -51,7 +51,7 @@ jobs:
       - name: Setup Go
         uses: actions/setup-go@v5
         with:
-          go-version-file: "go.mod"
+          go-version-file: "sing-box/go.mod"
           check-latest: false
 
       - name: Setup Java
@@ -63,10 +63,10 @@ jobs:
 
       - name: Setup NDK
         if: startsWith(matrix.job.target,'android')
-        uses: nttld/setup-ndk@v1.4.0
+        uses: nttld/setup-ndk@v1
         id: setup-ndk
         with:
-          ndk-version: r26b
+          ndk-version: r28
           add-to-path: true
           local-cache: false
           link-to-sdk: true
@@ -76,6 +76,7 @@ jobs:
         uses: egor-tensin/setup-mingw@v2
         with:
           platform: ${{ matrix.job.aarch }}
+
       - name: Setup macos
         if: startsWith(matrix.job.target,'macos') ||  startsWith(matrix.job.target,'ios')
         run: |
@@ -86,6 +87,7 @@ jobs:
           make -j$(($(nproc) + 1)) ${{ matrix.job.target }}
 
       - name: zip
+        working-directory: bin
         run: |
           tree 
           rm -f /*.h */*.h
@@ -93,7 +95,6 @@ jobs:
           echo tar -czvf ${{ matrix.job.name }}.tar.gz  $files
           tar -czvf ${{ matrix.job.name }}.tar.gz  $files
 
-        working-directory: bin
       - uses: actions/upload-artifact@v4
         if: ${{ success() }}
         with:
