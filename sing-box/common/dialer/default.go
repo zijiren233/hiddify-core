@@ -254,9 +254,9 @@ func (d *DefaultDialer) DialContext(ctx context.Context, network string, address
 	if d.wsDialer != nil {
 		switch N.NetworkName(network) {
 		case N.NetworkUDP:
-			return d.wsDialer.DialContextUDP(ctx, ws.WithAddr(address.String()))
+			return trackConn(d.wsDialer.DialContextUDP(ctx, ws.WithAddr(address.String())))
 		case N.NetworkTCP:
-			return d.wsDialer.DialContextTCP(ctx, ws.WithAddr(address.String()))
+			return trackConn(d.wsDialer.DialContextTCP(ctx, ws.WithAddr(address.String())))
 		}
 	}
 	if d.networkStrategy == nil {
